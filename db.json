@@ -1,0 +1,30 @@
+{
+  "categories": [
+    {
+      "name": "electronics",
+      "display_name": "electronics",
+      "description": "electronics category",
+      "id": "ql4GBwm"
+    },
+    {
+      "name": "electronics",
+      "display_name": "electronics",
+      "description": "electronics category",
+      "id": "qrsfvBo"
+    }
+  ],
+  "products": [
+    {
+      "name": "testProd",
+      "display_name": "testProd",
+      "description": "test testProd",
+      "id": "pqki30h"
+    },
+    {
+      "name": "testProd",
+      "display_name": "testProd",
+      "description": "test testProd",
+      "id": "tjHgOuU"
+    }
+  ]
+}

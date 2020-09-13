@@ -1,0 +1,10 @@
+{
+  "name": "lab-06",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "json-server --watch db.json --routes routes.json"
+  },
+  "author": "",
+  "license": "ISC"
+}
