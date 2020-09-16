@@ -1,209 +1,185 @@
-const {
-  server
-} = require('../lib/server');
-const supertest = require('supertest');
+/* eslint-disable no-undef, no-underscore-dangle */
+const supergoose = require("@code-fellows/supergoose");
+const { server } = require("../lib/server");
 
-const mockRequest = supertest(server);
+const mockRequest = supergoose(server);
+
+let testCategoryId;
+let testProductId;
 
 const category = {
-    id: "1",
-    name: 'category',
-    display_name: 'category',
-    description: 'category',
-    category: 'category',
+  name: "category",
+  display_name: "category",
+  description: "category",
 };
 
 const product = {
-    id: "1",
-    name: 'adnan',
-    display_name: 'adnan',
-    description: 'adnan',
-    category: 'adnan',
+  name: "adnan",
+  display_name: "adnan",
+  description: "adnan",
 };
 
-describe('Server module', () => {
-    it('Server error status code 404', () => {
-        return mockRequest
-            .get('/not-found').then(response => {
-                expect(response.status).toBe(404);
-            });
-    });
+describe("Server module", () => {
+  it("Server error status code 404", () => mockRequest
+    .get("/not-found").then((response) => {
+      expect(response.status).toBe(404);
+    }));
 
-    it('POST /categories', () => {
-        return mockRequest
-            .post('/categories')
-            .send(category)
-            .then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(category);
-            });
-    });
+  it("POST /categories", () => mockRequest
+    .post("/categories")
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      testCategoryId = results.body._id;
+      console.log("testCategoryId", testCategoryId);
+      Object.keys(category).forEach((key) => {
+        console.log(key);
+        expect(category[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it('GET /categories', () => {
-      return mockRequest
-          .get('/categories')
-          .send(category)
-          .then(results => {
-            expect(results.status).toBe(200);
-            expect(results.body.result[0]).toStrictEqual(category);
-          });
+  it("GET /categories", () => mockRequest
+    .get("/categories")
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(category).forEach((key) => {
+        expect(category[key]).toBe(results.body.result[0][key]);
+      });
+    }));
 
+  it("GET /categories/id", () => mockRequest
+    .get(`/categories/${testCategoryId}`).then((results) => {
+      Object.keys(category).forEach((key) => {
+        expect(category[key]).toBe(results.body[key]);
+      });
+    }));
 
-    });
+  it("GET /categories/id of not found", () => mockRequest
+    .get("/categories/000000000000000000000000").then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
-    it('GET /categories/id', () => {
-        return mockRequest
-            .get('/categories/1').then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(category);
-            });
-    });
+  it("PUT /categories/id", () => mockRequest
+    .put(`/categories/${testCategoryId}`)
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(category).forEach((key) => {
+        expect(category[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it('GET /categories/id of not found', () => {
-        return mockRequest
-            .get('/categories/sth').then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
+  it("PUT /categories/id of not found", () => mockRequest
+    .put("/categories/000000000000000000000000")
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
+  it("PATCH /categories/id", () => mockRequest
+    .patch(`/categories/${testCategoryId}`)
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(category).forEach((key) => {
+        expect(category[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it('PUT /categories/id', () => {
-        return mockRequest
-            .put('/categories/1')
-            .send(category)
-            .then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(category);
-            });
-    });
+  it("PATCH /categories/id of not found", () => mockRequest
+    .patch("/categories/000000000000000000000000")
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
-    it('PUT /categories/id of not found', () => {
-        return mockRequest
-            .put('/categories/sth')
-            .send(category)
-            .then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
+  it("DELETE /categories/id", () => mockRequest
+    .delete(`/categories/${testCategoryId}`).then((results) => {
+      expect(results.status).toBe(200);
+    }));
 
-    it('PATCH /categories/id', () => {
-        return mockRequest
-            .patch('/categories/1')
-            .send(category)
-            .then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(category);
-            });
-    });
+  it("DELETE /categories/id of not found", () => mockRequest
+    .delete("/categories/000000000000000000000000").then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
-    it('PATCH /categories/id of not found', () => {
-        return mockRequest
-            .patch('/categories/sth')
-            .send(category)
-            .then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
+  /* products */
 
-    it("DELETE /categories/id", () => {
-        return mockRequest
-            .delete('/categories/1').then(results => {
-                expect(results.status).toBe(200);
-            });
-    });
+  it("POST /products", () => mockRequest
+    .post("/products")
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        testProductId = results.body._id;
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it("DELETE /categories/id of not found", () => {
-        return mockRequest
-            .delete('/categories/sth').then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
+  it("GET /products ", () => mockRequest
+    .get("/products")
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body.result[0][key]);
+      });
+    }));
 
-    it('POST /products', () => {
-        return mockRequest
-            .post('/products')
-            .send(product)
-            .then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(product);
-            });
-    });
+  it("GET /products/id", () => mockRequest
+    .get(`/products/${testProductId}`).then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it('GET /products ', () => {
-        return mockRequest
-            .get('/products')
-            .then(response => {
-                expect(response.status).toBe(200);
-            });
-    });
+  it("GET /products/id of not found", () => mockRequest
+    .get("/products/000000000000000000000000").then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
-    it('GET /products/id', () => {
-        return mockRequest
-            .get('/products/1').then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(product);
-            });
-    });
+  it("PUT /products/id", () => mockRequest
+    .put(`/products/${testProductId}`)
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it('GET /products/id of not found', () => {
-        return mockRequest
-            .get('/products/sth').then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
+  it("PUT /products/id of not found", () => mockRequest
+    .put("/products/000000000000000000000000")
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
+  it("PATCH /products/id", () => mockRequest
+    .patch(`/products/${testProductId}`)
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
 
-    it('PUT /products/id', () => {
-        return mockRequest
-            .put('/products/1')
-            .send(product)
-            .then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(product);
-            });
-    });
+  it("PATCH /products/id of not found", () => mockRequest
+    .patch("/products/000000000000000000000000")
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(404);
+    }));
 
-    it('PUT /products/id of not found', () => {
-        return mockRequest
-            .put('/products/sth')
-            .send(product)
-            .then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
+  it("DELETE /products/id", () => mockRequest
+    .delete(`/products/${testProductId}`).then((results) => {
+      expect(results.status).toBe(200);
+    }));
 
-
-    it('PATCH /products/id', () => {
-        return mockRequest
-            .patch('/products/1')
-            .send(product)
-            .then(results => {
-                expect(results.status).toBe(200);
-                expect(results.body).toStrictEqual(product);
-            });
-    });
-
-    it('PATCH /products/id of not found', () => {
-        return mockRequest
-            .patch('/products/sth')
-            .send(product)
-            .then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
-
-    it("DELETE /products/id", () => {
-        return mockRequest
-            .delete('/products/1').then(results => {
-                expect(results.status).toBe(200);
-            });
-    });
-
-    it("DELETE /products/id of not found", () => {
-        return mockRequest
-            .delete('/products/sth').then(results => {
-                expect(results.status).toBe(404);
-            });
-    });
-
+  it("DELETE /products/id of not found", () => mockRequest
+    .delete("/products/000000000000000000000000").then((results) => {
+      expect(results.status).toBe(404);
+    }));
 });
