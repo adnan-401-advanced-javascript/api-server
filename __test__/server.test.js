@@ -1,6 +1,7 @@
 /* eslint-disable no-undef, no-underscore-dangle */
 const supergoose = require("@code-fellows/supergoose");
-const { server } = require("../lib/server");
+const http = require("http");
+const { server, start } = require("../lib/server");
 
 const mockRequest = supergoose(server);
 
@@ -17,9 +18,26 @@ const product = {
   name: "adnan",
   display_name: "adnan",
   description: "adnan",
+  category: "category",
 };
 
 describe("Server module", () => {
+  it("Server listening", () => {
+    start();
+    const options = {
+      host: "127.0.0.1",
+      port: 3000,
+      path: "/",
+    };
+    const req = http.request(options);
+    req.end();
+  });
+
+  it("Test Hello World", () => mockRequest
+    .get("/").then((response) => {
+      expect(response.status).toBe(200);
+    }));
+
   it("Server error status code 404", () => mockRequest
     .get("/not-found").then((response) => {
       expect(response.status).toBe(404);
@@ -31,9 +49,7 @@ describe("Server module", () => {
     .then((results) => {
       expect(results.status).toBe(200);
       testCategoryId = results.body._id;
-      console.log("testCategoryId", testCategoryId);
       Object.keys(category).forEach((key) => {
-        console.log(key);
         expect(category[key]).toBe(results.body[key]);
       });
     }));
@@ -51,7 +67,7 @@ describe("Server module", () => {
   it("GET /categories/id", () => mockRequest
     .get(`/categories/${testCategoryId}`).then((results) => {
       Object.keys(category).forEach((key) => {
-        expect(category[key]).toBe(results.body[key]);
+        expect(category[key]).toBe(results.body[0][key]);
       });
     }));
 
@@ -130,7 +146,7 @@ describe("Server module", () => {
     .get(`/products/${testProductId}`).then((results) => {
       expect(results.status).toBe(200);
       Object.keys(product).forEach((key) => {
-        expect(product[key]).toBe(results.body[key]);
+        expect(product[key]).toBe(results.body[0][key]);
       });
     }));
 
@@ -181,5 +197,106 @@ describe("Server module", () => {
   it("DELETE /products/id of not found", () => mockRequest
     .delete("/products/000000000000000000000000").then((results) => {
       expect(results.status).toBe(404);
+    }));
+
+  /* api/v1 */
+
+  it("POST /api/v1/inValidModel", () => mockRequest
+    .post("/api/v1/inValidModel")
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(500);
+    }));
+
+  // test categories test case
+  it("POST /api/v1/categories", () => mockRequest
+    .post("/api/v1/categories")
+    .send(category)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(category).forEach((key) => {
+        expect(category[key]).toBe(results.body[key]);
+      });
+    }));
+
+  /* products */
+  it("POST /api/v1/products", () => mockRequest
+    .post("/api/v1/products")
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        testProductId = results.body._id;
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
+
+  it("GET /api/v1/products ", () => mockRequest
+    .get("/api/v1/products")
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body.results[0][key]);
+      });
+    }));
+
+  it("GET /api/v1/products/id", () => mockRequest
+    .get(`/api/v1/products/${testProductId}`).then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body[0][key]);
+      });
+    }));
+
+  it("GET /api/v1/products/id of not found", () => mockRequest
+    .get("/api/v1/products/000000000000000000000000").then((results) => {
+      expect(results.status).toBe(200);
+    }));
+
+  it("PUT /api/v1/products/id", () => mockRequest
+    .put(`/api/v1/products/${testProductId}`)
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
+
+  it("PUT /api/v1/products/id of not found", () => mockRequest
+    .put("/api/v1/products/000000000000000000000000")
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      expect(JSON.stringify(results.body)).toBe("{}");
+    }));
+
+  it("PATCH /api/v1/products/id", () => mockRequest
+    .patch(`/api/v1/products/${testProductId}`)
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      Object.keys(product).forEach((key) => {
+        expect(product[key]).toBe(results.body[key]);
+      });
+    }));
+
+  it("PATCH /api/v1/products/id of not found", () => mockRequest
+    .patch("/api/v1/products/000000000000000000000000")
+    .send(product)
+    .then((results) => {
+      expect(results.status).toBe(200);
+      expect(JSON.stringify(results.body)).toBe("{}");
+    }));
+
+  it("DELETE /api/v1/products/id", () => mockRequest
+    .delete(`/api/v1/products/${testProductId}`).then((results) => {
+      expect(results.status).toBe(200);
+    }));
+
+  it("DELETE /api/v1/products/id of not found", () => mockRequest
+    .delete("/api/v1/products/000000000000000000000000").then((results) => {
+      expect(results.status).toBe(200);
+      expect(JSON.stringify(results.body)).toBe("{}");
     }));
 });
