@@ -4,7 +4,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest --verbose --coverage"
+    "test": "jest --verbose --coverage",
+    "lint": "eslint './**/*.js' --ignore-pattern node_modules/"
   },
   "author": "",
   "license": "ISC",
